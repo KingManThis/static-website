@@ -31,8 +31,10 @@ export default async function main(client: Client) {
     return 1;
   }
 
+  const { cwd, output } = client;
+
   if (argv['--help']) {
-    client.output.print(help(gitCommand, { columns: client.stderr.columns }));
+    output.print(help(gitCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
@@ -40,7 +42,6 @@ export default async function main(client: Client) {
   subcommand = argv._[0];
   const args = argv._.slice(1);
   const autoConfirm = Boolean(argv['--yes']);
-  const { cwd, output } = client;
 
   const linkedProject = await ensureLink('git', client, cwd, { autoConfirm });
   if (typeof linkedProject === 'number') {
@@ -57,7 +58,7 @@ export default async function main(client: Client) {
       return await disconnect(client, args, project, org);
     default:
       output.error(getInvalidSubcommand(COMMAND_CONFIG));
-      client.output.print(help(gitCommand, { columns: client.stderr.columns }));
+      output.print(help(gitCommand, { columns: client.stderr.columns }));
       return 2;
   }
 }

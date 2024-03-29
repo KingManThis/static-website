@@ -27,17 +27,17 @@ export default async (client: Client): Promise<number> => {
     return 1;
   }
 
+  const { output } = client;
+
   if (argv['--help'] || argv._[0] === 'help') {
-    client.output.print(
-      help(rollbackCommand, { columns: client.stderr.columns })
-    );
+    output.print(help(rollbackCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
   // validate the timeout
   let timeout = argv['--timeout'];
   if (timeout && ms(timeout) === undefined) {
-    client.output.error(`Invalid timeout "${timeout}"`);
+    output.error(`Invalid timeout "${timeout}"`);
     return 1;
   }
 
@@ -76,7 +76,7 @@ export default async (client: Client): Promise<number> => {
       }
     }
 
-    client.output.prettyError(err);
+    output.prettyError(err);
     return 1;
   }
 };

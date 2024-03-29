@@ -52,10 +52,8 @@ export default async function list(client: Client) {
     argv['--yes'] = argv['--confirm'];
   }
 
-  const { print, log, error, note, debug, spinner } = output;
-
   if (argv._.length > 2) {
-    error(`${getCommandName('ls [app]')} accepts at most one argument`);
+    output.error(`${getCommandName('ls [app]')} accepts at most one argument`);
     return 1;
   }
 
@@ -86,7 +84,7 @@ export default async function list(client: Client) {
   let host: string | undefined = undefined;
 
   if (app && !isValidName(app)) {
-    error(`The provided argument "${app}" is not a valid project name`);
+    output.error(`The provided argument "${app}" is not a valid project name`);
     return 1;
   }
 
@@ -115,7 +113,7 @@ export default async function list(client: Client) {
       isErrnoException(err) &&
       (err.code === 'NOT_AUTHORIZED' || err.code === 'TEAM_DELETED')
     ) {
-      error(err.message);
+      output.error(err.message);
       return 1;
     }
   }
@@ -136,11 +134,11 @@ export default async function list(client: Client) {
   const nextTimestamp = argv['--next'];
 
   if (typeof nextTimestamp !== undefined && Number.isNaN(nextTimestamp)) {
-    error('Please provide a number for flag `--next`');
+    output.error('Please provide a number for flag `--next`');
     return 1;
   }
 
-  spinner(`Fetching deployments in ${chalk.bold(contextName)}`);
+  output.spinner(`Fetching deployments in ${chalk.bold(contextName)}`);
 
   const now = new Now({
     client,
@@ -149,7 +147,7 @@ export default async function list(client: Client) {
   const start = Date.now();
 
   if (app && !isValidName(app)) {
-    error(`The provided argument "${app}" is not a valid project name`);
+    output.error(`The provided argument "${app}" is not a valid project name`);
     return 1;
   }
 
@@ -157,7 +155,7 @@ export default async function list(client: Client) {
   // we need to account for this here
   const asHost = app ? toHost(app) : '';
   if (asHost.endsWith('.now.sh') || asHost.endsWith('.vercel.app')) {
-    note(
+    output.note(
       `We suggest using ${getCommandName(
         'inspect <deployment>'
       )} for retrieving details about a single deployment`
@@ -166,7 +164,7 @@ export default async function list(client: Client) {
     const hostParts: string[] = asHost.split('-');
 
     if (hostParts.length < 2) {
-      error('Only deployment hostnames are allowed, no aliases');
+      output.error('Only deployment hostnames are allowed, no aliases');
       return 1;
     }
 
@@ -174,7 +172,7 @@ export default async function list(client: Client) {
     host = asHost;
   }
 
-  debug('Fetching deployments');
+  output.debug('Fetching deployments');
 
   const response = await now.list(app, {
     version: 6,
@@ -200,7 +198,7 @@ export default async function list(client: Client) {
   }
 
   if (app && !deployments.length) {
-    debug(
+    output.debug(
       'No deployments: attempting to find deployment that matches supplied app name'
     );
     let match;
@@ -209,14 +207,14 @@ export default async function list(client: Client) {
       await now.findDeployment(app);
     } catch (err: unknown) {
       if (isAPIError(err) && err.status === 404) {
-        debug('Ignore findDeployment 404');
+        output.debug('Ignore findDeployment 404');
       } else {
         throw err;
       }
     }
 
     if (match !== null && typeof match !== 'undefined') {
-      debug('Found deployment that matches app name');
+      output.debug('Found deployment that matches app name');
       deployments = Array.of(match);
     }
   }
@@ -229,11 +227,11 @@ export default async function list(client: Client) {
 
   // we don't output the table headers if we have no deployments
   if (!deployments.length) {
-    log(`No deployments found.`);
+    output.log(`No deployments found.`);
     return 0;
   }
 
-  log(
+  output.log(
     `${
       target === 'production' ? `Production deployments` : `Deployments`
     } for ${chalk.bold(app)} under ${chalk.bold(contextName)} ${elapsed(
@@ -242,17 +240,17 @@ export default async function list(client: Client) {
   );
 
   // information to help the user find other deployments or instances
-  log(
+  output.log(
     `To list deployments for a project, run ${getCommandName('ls [project]')}.`
   );
 
-  print('\n');
+  output.print('\n');
 
   const headers = ['Age', 'Deployment', 'Status', 'Environment', 'Duration'];
   if (showUsername) headers.push('Username');
   const urls: string[] = [];
 
-  client.output.print(
+  output.print(
     `${table(
       [
         headers.map(header => chalk.bold(chalk.cyan(header))),
@@ -290,7 +288,7 @@ export default async function list(client: Client) {
 
   if (pagination && pagination.count === 20) {
     const flags = getCommandFlags(argv, ['_', '--next']);
-    log(
+    output.log(
       `To display the next page, run ${getCommandName(
         `ls${app ? ' ' + app : ''}${flags} --next ${pagination.next}`
       )}`

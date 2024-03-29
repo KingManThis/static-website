@@ -20,13 +20,15 @@ export default async function link(client: Client) {
     '-c': '--confirm',
   });
 
+  const { output } = client;
+
   if (argv['--help']) {
-    client.output.print(help(linkCommand, { columns: client.stderr.columns }));
+    output.print(help(linkCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
   if ('--confirm' in argv) {
-    client.output.warn('`--confirm` is deprecated, please use `--yes` instead');
+    output.warn('`--confirm` is deprecated, please use `--yes` instead');
     argv['--yes'] = argv['--confirm'];
   }
 
@@ -34,7 +36,7 @@ export default async function link(client: Client) {
 
   let cwd = argv._[1];
   if (cwd) {
-    client.output.warn(
+    output.warn(
       `The ${cmd('vc link <directory>')} syntax is deprecated, please use ${cmd(
         `vc link --cwd ${cwd}`
       )} instead`
@@ -44,9 +46,7 @@ export default async function link(client: Client) {
   }
 
   if (argv['--repo']) {
-    client.output.warn(
-      `The ${cmd('--repo')} flag is in alpha, please report issues`
-    );
+    output.warn(`The ${cmd('--repo')} flag is in alpha, please report issues`);
     await ensureRepoLink(client, cwd, { yes, overwrite: true });
   } else {
     const link = await ensureLink('link', client, cwd, {

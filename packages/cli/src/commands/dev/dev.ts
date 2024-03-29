@@ -46,7 +46,7 @@ export default async function dev(
 
   if (link.status === 'error') {
     if (link.reason === 'HEADLESS') {
-      client.output.error(
+      output.error(
         `Command ${getCommandName(
           'dev'
         )} requires confirmation. Use option ${param('--yes')} to confirm.`

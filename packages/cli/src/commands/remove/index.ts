@@ -52,7 +52,6 @@ export default async function remove(client: Client) {
   const skipConfirmation = argv['--yes'];
   const safe = argv['--safe'];
   const ids: string[] = argv._;
-  const { success, error, log } = output;
 
   if (argv['--help'] || ids[0] === 'help') {
     output.print(help(removeCommand, { columns: client.stderr.columns }));
@@ -60,7 +59,7 @@ export default async function remove(client: Client) {
   }
 
   if (ids.length < 1) {
-    error(`${getCommandName('rm')} expects at least one argument`);
+    output.error(`${getCommandName('rm')} expects at least one argument`);
     output.print(help(removeCommand, { columns: client.stderr.columns }));
     return 1;
   }
@@ -68,7 +67,7 @@ export default async function remove(client: Client) {
   const invalidName = ids.find(name => !isValidName(name));
 
   if (invalidName) {
-    error(
+    output.error(
       `The provided argument "${invalidName}" is not a valid deployment or project`
     );
     return 1;
@@ -164,7 +163,7 @@ export default async function remove(client: Client) {
   });
 
   if (deployments.length === 0 && projects.length === 0) {
-    log(
+    output.log(
       `Could not find ${argv['--safe'] ? 'unaliased' : 'any'} deployments ` +
         `or projects matching ` +
         `${ids
@@ -174,7 +173,7 @@ export default async function remove(client: Client) {
     return 1;
   }
 
-  log(
+  output.log(
     `Found ${deploymentsAndProjects(deployments, projects)} for removal in ` +
       `${chalk.bold(contextName)} ${elapsed(Date.now() - findStart)}`
   );
@@ -208,17 +207,19 @@ export default async function remove(client: Client) {
     ...projects.map(project => removeProject(client, project.id)),
   ]);
 
-  success(
+  output.success(
     `Removed ${deploymentsAndProjects(deployments, projects)} ` +
       `${elapsed(Date.now() - start)}`
   );
 
   deployments.forEach(depl => {
-    console.log(`${chalk.gray('-')} ${chalk.bold(depl.url)}`);
+    // consider changing to `output.log`
+    output.print(`${chalk.gray('-')} ${chalk.bold(depl.url)}\n`);
   });
 
   projects.forEach((project: Project) => {
-    console.log(`${chalk.gray('-')} ${chalk.bold(project.name)}`);
+    // consider changing to `output.log`
+    output.print(`${chalk.gray('-')} ${chalk.bold(project.name)}\n`);
   });
 
   return 0;
@@ -260,7 +261,7 @@ function readConfirmation(
     }
 
     if (projects.length > 0) {
-      console.log(
+      output.print(
         `The following ${plural(
           'project',
           projects.length,
@@ -268,11 +269,12 @@ function readConfirmation(
         )} will be permanently removed, ` +
           `including all ${
             projects.length > 1 ? 'their' : 'its'
-          } deployments and aliases:`
+          } deployments and aliases:\n`
       );
 
       for (const project of projects) {
-        console.log(`${chalk.gray('-')} ${chalk.bold(project.name)}`);
+        // consider changing to `output.log`
+        output.print(`${chalk.gray('-')} ${chalk.bold(project.name)}\n`);
       }
     }
 

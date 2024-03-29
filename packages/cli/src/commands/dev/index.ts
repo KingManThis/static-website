@@ -23,15 +23,16 @@ const COMMAND_CONFIG = {
 };
 
 export default async function main(client: Client) {
+  const { output } = client;
   if (process.env.__VERCEL_DEV_RUNNING) {
-    client.output.error(
+    output.error(
       `${cmd(
         `${packageName} dev`
       )} must not recursively invoke itself. Check the Development Command in the Project Settings or the ${cmd(
         'dev'
       )} script in ${cmd('package.json')}`
     );
-    client.output.error(
+    output.error(
       `Learn More: https://vercel.link/recursive-invocation-of-commands`
     );
     return 1;
@@ -41,7 +42,6 @@ export default async function main(client: Client) {
 
   let argv;
   let args;
-  const { output } = client;
 
   try {
     argv = getArgs(client.argv.slice(2), {
@@ -73,7 +73,7 @@ export default async function main(client: Client) {
   }
 
   if (argv['--help']) {
-    client.output.print(help(devCommand, { columns: client.stderr.columns }));
+    output.print(help(devCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
@@ -91,19 +91,19 @@ export default async function main(client: Client) {
     const pkg = await readJSONFile<PackageJson>(path.join(dir, 'package.json'));
 
     if (pkg instanceof CantParseJSONFile) {
-      client.output.error(pkg.message);
+      output.error(pkg.message);
       return 1;
     }
 
     if (/\b(now|vercel)\b\W+\bdev\b/.test(pkg?.scripts?.dev || '')) {
-      client.output.error(
+      output.error(
         `${cmd(
           `${packageName} dev`
         )} must not recursively invoke itself. Check the Development Command in the Project Settings or the ${cmd(
           'dev'
         )} script in ${cmd('package.json')}`
       );
-      client.output.error(
+      output.error(
         `Learn More: https://vercel.link/recursive-invocation-of-commands`
       );
       return 1;

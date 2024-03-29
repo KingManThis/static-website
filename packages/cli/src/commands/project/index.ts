@@ -30,17 +30,17 @@ export default async function main(client: Client) {
     return 1;
   }
 
+  const { output } = client;
+
   if (argv['--help']) {
-    client.output.print(
-      help(projectCommand, { columns: client.stderr.columns })
-    );
+    output.print(help(projectCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
   argv._ = argv._.slice(1);
   subcommand = argv._[0] || 'list';
   const args = argv._.slice(1);
-  const { output } = client;
+
   const { contextName } = await getScope(client);
 
   switch (subcommand) {
@@ -54,9 +54,7 @@ export default async function main(client: Client) {
       return await rm(client, args);
     default:
       output.error(getInvalidSubcommand(COMMAND_CONFIG));
-      client.output.print(
-        help(projectCommand, { columns: client.stderr.columns })
-      );
+      output.print(help(projectCommand, { columns: client.stderr.columns }));
       return 2;
   }
 }

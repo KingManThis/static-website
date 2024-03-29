@@ -40,12 +40,13 @@ export default async function main(client: Client) {
     return 1;
   }
 
+  const { output } = client;
+
   if (argv['--help']) {
-    client.output.print(help(certsCommand, { columns: client.stderr.columns }));
+    output.print(help(certsCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
-  const { output } = client;
   const { subcommand, args } = getSubcommand(argv._.slice(1), COMMAND_CONFIG);
   switch (subcommand) {
     case 'issue':
@@ -61,9 +62,7 @@ export default async function main(client: Client) {
       return 1;
     default:
       output.error('Please specify a valid subcommand: ls | issue | rm');
-      client.output.print(
-        help(certsCommand, { columns: client.stderr.columns })
-      );
+      output.print(help(certsCommand, { columns: client.stderr.columns }));
       return 2;
   }
 }

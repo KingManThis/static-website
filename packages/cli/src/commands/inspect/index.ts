@@ -39,8 +39,6 @@ export default async function inspect(client: Client) {
     return 2;
   }
 
-  const { print, log, error } = client.output;
-
   // extract the first parameter
   let [, deploymentIdOrHost] = argv._;
 
@@ -54,7 +52,9 @@ export default async function inspect(client: Client) {
   }
 
   if (!deploymentIdOrHost) {
-    error(`${getCommandName('inspect <url>')} expects exactly one argument`);
+    output.error(
+      `${getCommandName('inspect <url>')} expects exactly one argument`
+    );
     output.print(help(inspectCommand, { columns: client.stderr.columns }));
     return 1;
   }
@@ -62,7 +62,7 @@ export default async function inspect(client: Client) {
   // validate the timeout
   const timeout = ms(argv['--timeout'] ?? '3m');
   if (timeout === undefined) {
-    error(`Invalid timeout "${argv['--timeout']}"`);
+    output.error(`Invalid timeout "${argv['--timeout']}"`);
     return 1;
   }
 
@@ -75,7 +75,7 @@ export default async function inspect(client: Client) {
       isErrnoException(err) &&
       (err.code === 'NOT_AUTHORIZED' || err.code === 'TEAM_DELETED')
     ) {
-      error(err.message);
+      output.error(err.message);
       return 1;
     }
 
@@ -87,7 +87,7 @@ export default async function inspect(client: Client) {
   try {
     deploymentIdOrHost = new URL(deploymentIdOrHost).hostname;
   } catch {}
-  client.output.spinner(
+  output.spinner(
     `Fetching deployment "${deploymentIdOrHost}" in ${chalk.bold(contextName)}`
   );
 
@@ -123,36 +123,36 @@ export default async function inspect(client: Client) {
       ? await client.fetch<{ builds: Build[] }>(`/v11/deployments/${id}/builds`)
       : { builds: [] };
 
-  log(
+  output.log(
     `Fetched deployment "${chalk.bold(url)}" in ${chalk.bold(
       contextName
     )} ${elapsed(Date.now() - depFetchStart)}`
   );
 
-  print('\n');
-  print(chalk.bold('  General\n\n'));
-  print(`    ${chalk.cyan('id')}\t\t${id}\n`);
-  print(`    ${chalk.cyan('name')}\t${name}\n`);
-  print(`    ${chalk.cyan('status')}\t${stateString(readyState)}\n`);
-  print(`    ${chalk.cyan('url')}\t\thttps://${url}\n`);
+  output.print('\n');
+  output.print(chalk.bold('  General\n\n'));
+  output.print(`    ${chalk.cyan('id')}\t\t${id}\n`);
+  output.print(`    ${chalk.cyan('name')}\t${name}\n`);
+  output.print(`    ${chalk.cyan('status')}\t${stateString(readyState)}\n`);
+  output.print(`    ${chalk.cyan('url')}\t\thttps://${url}\n`);
   if (createdAt) {
-    print(
+    output.print(
       `    ${chalk.cyan('created')}\t${new Date(createdAt)} ${elapsed(
         Date.now() - createdAt,
         true
       )}\n`
     );
   }
-  print('\n\n');
+  output.print('\n\n');
 
   if (aliases !== undefined && aliases.length > 0) {
-    print(chalk.bold('  Aliases\n\n'));
+    output.print(chalk.bold('  Aliases\n\n'));
     let aliasList = '';
     for (const alias of aliases) {
       aliasList += `${chalk.gray('╶')} https://${alias}\n`;
     }
-    print(indent(aliasList, 4));
-    print('\n\n');
+    output.print(indent(aliasList, 4));
+    output.print('\n\n');
   }
 
   if (builds.length > 0) {
@@ -164,15 +164,15 @@ export default async function inspect(client: Client) {
         createdAt && readyStateAt ? elapsed(readyStateAt - createdAt) : null;
     }
 
-    print(chalk.bold('  Builds\n\n'));
-    print(indent(buildsList(builds, times).toPrint, 4));
-    print('\n\n');
+    output.print(chalk.bold('  Builds\n\n'));
+    output.print(indent(buildsList(builds, times).toPrint, 4));
+    output.print('\n\n');
   }
 
   if (Array.isArray(routes) && routes.length > 0) {
-    print(chalk.bold('  Routes\n\n'));
-    print(indent(routesList(routes), 4));
-    print(`\n\n`);
+    output.print(chalk.bold('  Routes\n\n'));
+    output.print(indent(routesList(routes), 4));
+    output.print(`\n\n`);
   }
 
   return 0;

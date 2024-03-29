@@ -165,8 +165,6 @@ export default async (client: Client): Promise<number> => {
     }
   }
 
-  const { log, debug, error, prettyError } = output;
-
   const quiet = !client.stdout.isTTY;
 
   let { path: cwd } = pathValidation;
@@ -317,7 +315,7 @@ export default async (client: Client): Promise<number> => {
 
     const prebuiltExists = await fs.pathExists(join(cwd, '.vercel/output'));
     if (!prebuiltExists) {
-      error(
+      output.error(
         `The ${param(
           '--prebuilt'
         )} option was used, but no prebuilt output found in ".vercel/output". Run ${getCommandName(
@@ -339,7 +337,7 @@ export default async (client: Client): Promise<number> => {
           'build'
         )} failed with error:\n`
       );
-      prettyError(prebuiltError);
+      output.prettyError(prebuiltError);
       return 1;
     }
 
@@ -351,7 +349,7 @@ export default async (client: Client): Promise<number> => {
         specifyTarget = ` --prod`;
       }
 
-      prettyError({
+      output.prettyError({
         message: `The ${param(
           '--prebuilt'
         )} option was used with the target environment "${assumedTarget}", but the prebuilt output found in ".vercel/output" was built with target environment "${
@@ -395,7 +393,7 @@ export default async (client: Client): Promise<number> => {
     const rootDirectoryConfig = readLocalConfig(join(cwd, rootDirectory));
 
     if (rootDirectoryConfig) {
-      debug(`Read local config from root directory (${rootDirectory})`);
+      output.debug(`Read local config from root directory (${rootDirectory})`);
       localConfig = rootDirectoryConfig;
     } else if (localConfig) {
       output.print(
@@ -430,7 +428,7 @@ export default async (client: Client): Promise<number> => {
   // the data is merged with other data before it is passed to the API (which
   // also does schema validation).
   if (typeof localConfig.env !== 'undefined' && !isObject(localConfig.env)) {
-    error(
+    output.error(
       `The ${code('env')} property in ${highlight(
         localConfig[fileNameSymbol]!
       )} needs to be an object`
@@ -440,7 +438,7 @@ export default async (client: Client): Promise<number> => {
 
   if (typeof localConfig.build !== 'undefined') {
     if (!isObject(localConfig.build)) {
-      error(
+      output.error(
         `The ${code('build')} property in ${highlight(
           localConfig[fileNameSymbol]!
         )} needs to be an object`
@@ -452,7 +450,7 @@ export default async (client: Client): Promise<number> => {
       typeof localConfig.build.env !== 'undefined' &&
       !isObject(localConfig.build.env)
     ) {
-      error(
+      output.error(
         `The ${code('build.env')} property in ${highlight(
           localConfig[fileNameSymbol]!
         )} needs to be an object`
@@ -486,10 +484,10 @@ export default async (client: Client): Promise<number> => {
 
   // If there's any undefined values, then inherit them from this process
   try {
-    await addProcessEnv(log, deploymentEnv);
-    await addProcessEnv(log, deploymentBuildEnv);
+    await addProcessEnv(output, deploymentEnv);
+    await addProcessEnv(output, deploymentBuildEnv);
   } catch (err: unknown) {
-    error(errorToString(err));
+    output.error(errorToString(err));
     return 1;
   }
 
@@ -670,12 +668,12 @@ export default async (client: Client): Promise<number> => {
     }
 
     if (deployment === null) {
-      error('Uploading failed. Please try again.');
+      output.error('Uploading failed. Please try again.');
       return 1;
     }
   } catch (err: unknown) {
     if (isError(err)) {
-      debug(`Error: ${err}\n${err.stack}`);
+      output.debug(`Error: ${err}\n${err.stack}`);
     }
 
     if (err instanceof NotDomainOwner) {
@@ -746,7 +744,7 @@ export default async (client: Client): Promise<number> => {
     if (isAPIError(err) && err.code === 'size_limit_exceeded') {
       const { sizeLimit = 0 } = err;
       const message = `File size limit exceeded (${bytes(sizeLimit)})`;
-      error(message);
+      output.error(message);
       return 1;
     }
 
@@ -831,10 +829,7 @@ function handleCreateDeployError(
   return error;
 }
 
-const addProcessEnv = async (
-  log: (str: string) => void,
-  env: typeof process.env
-) => {
+const addProcessEnv = async (output: Output, env: typeof process.env) => {
   let val;
 
   for (const key of Object.keys(env)) {
@@ -845,7 +840,7 @@ const addProcessEnv = async (
     val = process.env[key];
 
     if (typeof val === 'string') {
-      log(
+      output.log(
         `Reading ${chalk.bold(
           `"${chalk.bold(key)}"`
         )} from your env (as no value was specified)`

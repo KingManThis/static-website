@@ -12,7 +12,6 @@ const COMMAND_CONFIG = {
 };
 
 export default async function main(client: Client) {
-  const { output } = client;
   let argv;
   let args;
 
@@ -27,8 +26,10 @@ export default async function main(client: Client) {
     return 1;
   }
 
+  const { output } = client;
+
   if (argv['--help']) {
-    client.output.print(help(initCommand, { columns: client.stderr.columns }));
+    output.print(help(initCommand, { columns: client.stderr.columns }));
     return 2;
   }
 

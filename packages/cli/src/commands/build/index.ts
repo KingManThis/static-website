@@ -174,7 +174,7 @@ export default async function main(client: Client): Promise<number> {
     let confirmed = yes;
     if (!confirmed) {
       if (!isTTY) {
-        client.output.print(
+        output.print(
           `No Project Settings found locally. Run ${cli.getCommandName(
             'pull --yes'
           )} to retrieve them.`
@@ -191,7 +191,7 @@ export default async function main(client: Client): Promise<number> {
       );
     }
     if (!confirmed) {
-      client.output.print(`Canceled. No Project Settings retrieved.\n`);
+      output.print(`Canceled. No Project Settings retrieved.\n`);
       return 0;
     }
     const { argv: originalArgv } = client;
@@ -386,9 +386,7 @@ async function doBuild(
     }
 
     for (const w of detectedBuilders.warnings) {
-      console.log(
-        `Warning: ${w.message} ${w.action || 'Learn More'}: ${w.link}`
-      );
+      output.warn(w.message, null, w.link, w.action || 'Learn More');
     }
 
     if (detectedBuilders.builders) {

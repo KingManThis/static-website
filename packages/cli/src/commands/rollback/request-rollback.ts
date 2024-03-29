@@ -21,8 +21,6 @@ export default async function requestRollback({
   deployId: string;
   timeout?: string;
 }): Promise<number> {
-  const { output } = client;
-
   const { contextName, deployment, project } = await getProjectByDeployment({
     client,
     deployId,
@@ -34,6 +32,8 @@ export default async function requestRollback({
     body: {}, // required
     method: 'POST',
   });
+
+  const { output } = client;
 
   if (timeout !== undefined && ms(timeout) === 0) {
     output.log(

@@ -112,13 +112,15 @@ export default async function main(client: Client) {
     return pullResultCode;
   }
 
-  client.output.print('\n');
-  client.output.log('Downloading project settings');
+  const { output } = client;
+
+  output.print('\n');
+  output.log('Downloading project settings');
   const isRepoLinked = typeof repoRoot === 'string';
   await writeProjectSettings(cwd, project, org, isRepoLinked);
 
   const settingsStamp = stamp();
-  client.output.print(
+  output.print(
     `${prependEmoji(
       `Downloaded project settings to ${chalk.bold(
         humanizePath(join(cwd, VERCEL_DIR, VERCEL_DIR_PROJECT))

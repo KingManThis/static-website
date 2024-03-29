@@ -188,11 +188,12 @@ async function connectArg({
   project,
   repoInfo,
 }: ConnectArgParams) {
+  const { output } = client;
   const { url: repoUrl } = repoInfo;
-  client.output.log(`Connecting Git remote: ${link(repoUrl)}`);
+  output.log(`Connecting Git remote: ${link(repoUrl)}`);
   const parsedRepoArg = parseRepoUrl(repoUrl);
   if (!parsedRepoArg) {
-    client.output.error(
+    output.error(
       `Failed to parse URL "${repoUrl}". Please ensure the URL is valid.`
     );
     return 1;
@@ -213,7 +214,7 @@ async function connectArg({
   if (typeof connect === 'number') {
     return connect;
   }
-  client.output.log(
+  output.log(
     `Connected ${formatProvider(provider)} repository ${chalk.cyan(repoPath)}!`
   );
   return 0;

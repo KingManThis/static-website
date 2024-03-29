@@ -40,15 +40,15 @@ export default async function main(client: Client) {
     handleError(error);
     return 1;
   }
+  const { cwd, output, config } = client;
 
   if (argv['--help']) {
-    client.output.print(help(envCommand, { columns: client.stderr.columns }));
+    output.print(help(envCommand, { columns: client.stderr.columns }));
     return 2;
   }
 
   const subArgs = argv._.slice(1);
   const { subcommand, args } = getSubcommand(subArgs, COMMAND_CONFIG);
-  const { cwd, output, config } = client;
 
   const target = argv['--environment']?.toLowerCase() || 'development';
   if (!isValidEnvTarget(target)) {
@@ -94,9 +94,7 @@ export default async function main(client: Client) {
         );
       default:
         output.error(getInvalidSubcommand(COMMAND_CONFIG));
-        client.output.print(
-          help(envCommand, { columns: client.stderr.columns })
-        );
+        output.print(help(envCommand, { columns: client.stderr.columns }));
         return 2;
     }
   }

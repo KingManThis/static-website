@@ -64,15 +64,12 @@ export default async function rm(
   }
 
   await removeAliasById(client, alias.uid);
-  console.log(
-    `${chalk.cyan('> Success!')} Alias ${chalk.bold(
-      alias.alias
-    )} removed ${removeStamp()}`
-  );
+  output.success(`Alias ${chalk.bold(alias.alias)} removed ${removeStamp()}`);
   return 0;
 }
 
 async function confirmAliasRemove(client: Client, alias: Alias) {
+  const { output } = client;
   const srcUrl = alias.deployment
     ? chalk.underline(alias.deployment.url)
     : null;
@@ -91,7 +88,7 @@ async function confirmAliasRemove(client: Client, alias: Alias) {
     }
   );
 
-  client.output.log(`The following alias will be removed permanently`);
-  client.output.print(`  ${tbl}\n`);
+  output.log(`The following alias will be removed permanently`);
+  output.print(`  ${tbl}\n`);
   return confirm(client, chalk.red('Are you sure?'), false);
 }

@@ -9,8 +9,9 @@ import { getCommandName } from '../../util/pkg-name';
 const e = encodeURIComponent;
 
 export default async function rm(client: Client, args: string[]) {
+  const { output } = client;
   if (args.length !== 1) {
-    client.output.error(
+    output.error(
       `Invalid number of arguments. Usage: ${chalk.cyan(
         `${getCommandName('project rm <name>')}`
       )}`
@@ -25,7 +26,7 @@ export default async function rm(client: Client, args: string[]) {
   const yes = await readConfirmation(client, name);
 
   if (!yes) {
-    client.output.log('User abort');
+    output.log('User abort');
     return 0;
   }
 
@@ -35,16 +36,16 @@ export default async function rm(client: Client, args: string[]) {
     });
   } catch (err: unknown) {
     if (isAPIError(err) && err.status === 404) {
-      client.output.error('No such project exists');
+      output.error('No such project exists');
       return 1;
     }
     if (isAPIError(err) && err.status === 403) {
-      client.output.error(err.message);
+      output.error(err.message);
       return 1;
     }
   }
   const elapsed = ms(Date.now() - start);
-  client.output.log(
+  output.log(
     `${chalk.cyan('Success!')} Project ${chalk.bold(name)} removed ${chalk.gray(
       `[${elapsed}]`
     )}`
