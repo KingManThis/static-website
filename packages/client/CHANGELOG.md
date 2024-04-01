@@ -1,5 +1,11 @@
 # @vercel/client
 
+## 13.1.9
+
+### Patch Changes
+
+- Handle `--repo` linked in `vc deploy --prebuilt` ([#11309](https://github.com/vercel/vercel/pull/11309))
+
 ## 13.1.8
 
 ### Patch Changes

@@ -328,7 +328,7 @@ importers:
         specifier: 4.1.6
         version: link:../next
       '@vercel/node':
-        specifier: 3.0.25
+        specifier: 3.0.26
         version: link:../node
       '@vercel/python':
         specifier: 4.1.1
@@ -482,7 +482,7 @@ importers:
         specifier: 1.0.28
         version: link:../../internals/types
       '@vercel/client':
-        specifier: 13.1.8
+        specifier: 13.1.9
         version: link:../client
       '@vercel/error-utils':
         specifier: 2.0.2

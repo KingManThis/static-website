@@ -1,5 +1,11 @@
 # @vercel/node
 
+## 3.0.26
+
+### Patch Changes
+
+- Fix issue with serverless function on docker ([#11226](https://github.com/vercel/vercel/pull/11226))
+
 ## 3.0.25
 
 ### Patch Changes
